@@ -16,7 +16,9 @@ const getMedicalRecordPrestations = async (req, res) => {
 }
 
 
+
 module.exports = {
     createMedicalRecordPrestation,
-    getMedicalRecordPrestations
+    getMedicalRecordPrestations,
+    
 }   

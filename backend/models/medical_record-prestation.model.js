@@ -11,7 +11,6 @@ const createMedicalRecordPrestation = async (data) => {
 
     // Step 1: Get the PrestationPrice ID
     const prestation_price_id = await getPrestationPrice(medical_record[0].contract_id, specialty_id, prestation_id);
-    console.log("Prestation Price ID:", prestation_price_id);
 
     if (!prestation_price_id) {
         throw new Error("No prestation price found for the provided parameters.");
@@ -31,6 +30,8 @@ const createMedicalRecordPrestation = async (data) => {
         prestation_price_id,
         doctor_id
     ]);
+
+    console.log(insertResult);
 
     const prestationId = insertResult.insertId;
 
@@ -111,9 +112,25 @@ const getPrestationsMediclRecord = async (medical_record_id) => {
     return rows;
 }
 
+async function hasAvenant(contractId) {
+    try {
+        const [rows] = await db.query(
+            'SELECT COUNT(*) AS count FROM Avenant WHERE contract_id = ?',
+            [contractId]
+        );
+
+        return rows[0].count > 0;
+    } catch (err) {
+        console.error('Error checking for avenant:', err);
+        throw err;
+    }
+}
+
+
 
 
 module.exports = {
     createMedicalRecordPrestation,
     getPrestationsMediclRecord,
+    getPrestationPrice
 }

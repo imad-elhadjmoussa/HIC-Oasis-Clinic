@@ -10,15 +10,19 @@ import { useToast } from "primevue/usetoast";
 import Toast from "primevue/toast";
 import Card from 'primevue/card';
 import Dropdown from 'primevue/dropdown';
-import AddPatientModel from "./AddPatientModel.vue";
-import { getPatients } from "../../../api/patient";
-import { formatDate, showNotification } from "..";
+import { getPatients, deletePatient } from "../../../api/patient"; // Added deletePatient
+import { formatDate, showNotification } from "./../index";
+import AddPatientModel from "./../../../components/Patients/AddPatientModel.vue";
+
 
 const toast = useToast();
 const patients = ref([]);
 const searchTerm = ref("");
 const addPatientDialog = ref(false);
-const filterField = ref('all'); // Default filter field
+const deleteDialogVisible = ref(false);
+const patientToDelete = ref(null);
+const isDeleting = ref(false);
+const filterField = ref('all');
 
 const filterOptions = ref([
     { label: 'All Fields', value: 'all' },
@@ -33,6 +37,28 @@ const fetchPatients = async () => {
         patients.value = response;
     } catch (error) {
         showNotification(toast, error.message || 'Failed to fetch patients', 'error');
+    }
+};
+
+const confirmDelete = (patient) => {
+    patientToDelete.value = patient;
+    deleteDialogVisible.value = true;
+};
+
+const handleDelete = async () => {
+    if (!patientToDelete.value) return;
+
+    isDeleting.value = true;
+    try {
+        await deletePatient(patientToDelete.value.id);
+        showNotification(toast, 'Patient deleted successfully', 'success');
+        await fetchPatients(); // Refresh the list
+    } catch (error) {
+        showNotification(toast, error.message || 'Failed to delete patient', 'error');
+    } finally {
+        isDeleting.value = false;
+        deleteDialogVisible.value = false;
+        patientToDelete.value = null;
     }
 };
 
@@ -109,11 +135,15 @@ const filteredPatients = computed(() => {
                         </template>
                     </Column>
 
-                    <Column header="Actions" style="width: 180px">
+                    <Column header="Actions" style="width: 250px">
                         <template #body="{ data }">
-                            <RouterLink :to="`/patients/${data.id}`">
-                                <Button icon="pi pi-eye" size="small" severity="info" label="Details" />
-                            </RouterLink>
+                            <div class="flex gap-2">
+                                <RouterLink :to="`patients/${data.id}`">
+                                    <Button icon="pi pi-eye" size="small" severity="info" label="Details" />
+                                </RouterLink>
+                                <Button icon="pi pi-trash" size="small" severity="danger" label="Delete"
+                                    @click="confirmDelete(data)" />
+                            </div>
                         </template>
                     </Column>
                 </DataTable>
@@ -122,7 +152,43 @@ const filteredPatients = computed(() => {
 
         <!-- Dialogs -->
         <AddPatientModel v-model:visible="addPatientDialog" :patients="patients" />
+
+        <!-- Delete Confirmation Dialog -->
+        <Dialog v-model:visible="deleteDialogVisible" :style="{ width: '450px' }" header="Confirm Deletion"
+            :modal="true" :closable="!isDeleting">
+            <div class="confirmation-content flex items-center gap-3">
+                <i class="pi pi-exclamation-triangle text-red-500" style="font-size: 2rem" />
+                <div>
+                    <p>Are you sure you want to delete this patient?</p>
+                    <p class="font-semibold mt-2">
+                        {{ patientToDelete?.first_name }} {{ patientToDelete?.last_name }}
+                        <span class="text-gray-600">(ID: {{ patientToDelete?.national_id_number }})</span>
+                    </p>
+                    <p class="text-sm text-red-500 mt-2">This action cannot be undone.</p>
+                </div>
+            </div>
+            <template #footer>
+                <Button label="Cancel" icon="pi pi-times" @click="deleteDialogVisible = false" class="p-button-text"
+                    :disabled="isDeleting" />
+                <Button label="Delete" icon="pi pi-trash" @click="handleDelete" class="p-button-danger"
+                    :loading="isDeleting" />
+            </template>
+        </Dialog>
     </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.confirmation-content {
+    display: flex;
+    align-items: flex-start;
+}
+
+.flex.gap-2 {
+    flex-wrap: nowrap;
+}
+
+.p-button-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+}
+</style>

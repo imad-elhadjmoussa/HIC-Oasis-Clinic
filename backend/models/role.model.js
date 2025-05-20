@@ -1,7 +1,7 @@
 const db=require("./../db/connection")
 
 const getRoles = async () => {
-    const [rows] = await db.query('SELECT * FROM roles');
+    const [rows] = await db.query('SELECT * FROM role');
     return rows;
 }
 

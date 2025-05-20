@@ -10,5 +10,6 @@ router.get('/:id', medicalRecordsController.getMedicalRecord);
 // router.get('/patient/:patientId', medicalRecordsController.getMedicalByPatientId);
 router.post('/', medicalRecordsController.createMedicalRecord);
 router.patch('/:id', medicalRecordsController.updateMedicalRecord);
+router.delete('/:id', medicalRecordsController.deleteMedicalRecord);
 
 module.exports = router;   

@@ -89,15 +89,8 @@ const updatePatient = async (req, res) => {
 const deletePatient = async (req, res) => {
     try {
         const id = req.params.id;
-
-        // Check if patient exists
-        const patient = await patientModel.getPatientById(id);
-        if (!patient) {
-            return res.status(404).json({ message: "Patient not found" });
-        }
-
-        const result = await patientModel.deletePatient(id);
-        res.json({ message: "Patient deleted successfully", result });
+        await patientModel.deletePatient(id);
+        res.json({ message: "Patient deleted successfully" });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

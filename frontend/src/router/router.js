@@ -1,122 +1,109 @@
-import { createRouter, createWebHistory } from "vue-router";
-import UserPage from "../pages/Users/UserPage.vue";
-import ReceptionPage from "../pages/Reception/ReceptionPage.vue";
-import RolesServicesPage from "../pages/Roles & Services/RolesServicesPage.vue";
-import HomePage from "../pages/HomePage.vue";
-import LoginPage from "../pages/Auth/LoginPage.vue";
-import DashboardLayout from "../layout/AdminDashboardLayout.vue";
-import ReceptionDashboardLayout from "../layout/ReceptionDashboardLayout.vue";
-import CashierLayout from "../layout/CashierLayout.vue";
-import CashierPage from "../pages/Cashier/CashierPage.vue";
-import CashierPrestationsList from "../pages/Cashier/CashierPrestationsList.vue";
-import CashierHistory from "../pages/Cashier/CashierHistory.vue";
-import FacturationLayout from "../layout/FacturationLayout.vue";
-import FacturationHome from "../pages/Facturation/FacturationHome.vue";
-import Patient from "../pages/Facturation/patient.vue";
-import FacturePatient from "../pages/Facturation/facturePatient.vue";
-import Borderau from "../pages/Facturation/Borderau.vue";
-import Step from "../pages/Facturation/step.vue";
-import FichesList from "../pages/Reception/Fiche/FichesList.vue";
-import FicheDetails from "../pages/Reception/Fiche/FicheDetails.vue";
-import PatientsList from "../pages/Reception/Patient/PatientsList.vue";
-import PatientDetails from "../pages/Reception/Patient/PatientDetails.vue";
+import { createRouter, createWebHistory } from 'vue-router';
+import axios from 'axios';
+import { useUserStore } from './../stors/user'; // Import the user store
 
-// Function to check authentication
-const isAuthenticated = () => !!localStorage.getItem("user");
+import UserPage from '../pages/Users/UsersList.vue';
+import ReceptionPage from '../pages/Reception/ReceptionPage.vue';
+import LoginPage from '../pages/Auth/LoginPage.vue';
+import ReceptionDashboardLayout from '../layout/ReceptionDashboardLayout.vue';
+import PatientsList from '../pages/Reception/Patient/PatientsList.vue';
+import PatientDetails from '../pages/Reception/Patient/PatientDetails.vue';
+import UsersLayout from '../layout/UsersLayout.vue';
+import UsersRoles from '../pages/Users/UsersRoles.vue';
+import UsersHome from '../pages/Users/UsersHome.vue';
+import AdminHomePage from '../pages/Admin/AdminHomePage.vue';
+import MedicalRecordDetails from '../pages/Reception/MedicalRecord/MedicalRecordDetails.vue';
+import MedicalRecordList from '../pages/Reception/MedicalRecord/MedicalRecordsList.vue';
+import PreferencesDashboardLayout from '../layout/PreferencesDashboardLayout.vue';
+import SpecialtiesList from '../pages/Specialties/SpecialtiesList.vue';
+import PrestationsPage from '../pages/Prestation/PrestationsPage.vue';
+import DoctorsPage from '../pages/Doctors/DoctorsPage.vue';
+import CashierPage from '../pages/Cashier/CashierPage.vue';
+import CashierPrestationsList from '../pages/Cashier/CashierPrestationsList.vue';
+import CashierLayout from '../layout/CashierLayout.vue';
 
-// **Base Public Routes**
+// Base Public Routes
 const routes = [
     {
-        path: "/login",
-        name: "Login",
+        path: '/login',
+        name: 'Login',
         component: LoginPage,
-        beforeEnter: (to, from, next) => {
-            if (isAuthenticated()) next("/"); // Redirect logged-in users
-            else next();
-        },
+        beforeEnter: async (to, from, next) => {
+            const userStore = useUserStore();
+            await userStore.fetchSession(); // Fetch the session when trying to access login
+            if (userStore.isAuthenticated) next('/'); // If already logged in, redirect to home
+            else next(); // Otherwise, allow login page
+        }
     },
 ];
 
-// **Admin Routes (Full Dashboard)**
-const adminRoutes = {
-    path: "/",
-    component: DashboardLayout,
-    meta: { requiresAuth: true, roles: ["Admin"] },
-    children: [
-        { path: "", name: "Home", component: HomePage },
-        { path: "users", name: "Users", component: UserPage },
-        { path: "roles-services", name: "RolesServices", component: RolesServicesPage },
-        // {
-        //     path: "reception",
-        //     name: "Reception",
-        //     component: ReceptionPage,
-        //     children: [
-        //         { path: "patients", name: "Patients", component: PatientsList },
-        //         { path: "patients/:patientId/fiches", name: "Fiches", component: FicheList, props: true },
-        //         { path: "patients/:patientId/fiches/:ficheId/prestations", name: "Prestations", component: PrestationList, props: true },
-        //     ],
-        // },
-        // { path: "/reception", component: ReceptionPage, meta: { requiresAuth: true, roles: ["Admin"] } },
-        // { path: "/patients", component: PatientsList, meta: { requiresAuth: true, roles: ["Admin"] } },
-        // { path: "/patients/:patientId/fiches", component: FicheList, props: true, meta: { requiresAuth: true, roles: ["Reception"] } },
-        // { path: "/patients/:patientId/fiches/:ficheId/prestations", component: PrestationList, props: true, meta: { requiresAuth: true, roles: ["Admin"] } },
-    ],
-};
-// Reception routes
+// Admin Routes
+const adminRoutes = [
+    { path: '/', component: AdminHomePage },
+    {
+        path: '/users',
+        component: UsersLayout,
+        children: [
+            { path: '', name: 'Users', component: UsersHome },
+            { path: 'list', name: 'UsersList', component: UserPage },
+            { path: 'roles', name: 'UsersRoles', component: UsersRoles },
+        ]
+    },
+    {
+        path: '/reception',
+        component: ReceptionDashboardLayout,
+        children: [
+            { path: '', component: ReceptionPage },
+            { path: 'patients', name: 'Patients', component: PatientsList },
+            { path: 'patients/:id', name: 'PatientDetails', component: PatientDetails },
+            { path: 'medical-records', name: 'MedicalRecords', component: MedicalRecordList },
+            { path: 'medical-records/:id', name: 'MedicalRecord', component: MedicalRecordDetails },
+        ]
+    },
+    ,
+    {
+        path: '/preferences',
+        component: PreferencesDashboardLayout,
+        children: [
+            { path: 'specialties', component: SpecialtiesList },
+            { path: 'prestations', component: PrestationsPage },
+            { path: 'doctors', component: DoctorsPage },
+
+        ]
+    },
+    {
+        path: '/cashier',
+        component: CashierLayout,
+        children: [
+            { path: '', component: CashierPage },
+            { path: 'fiches/:ficheId/prestations', component: CashierPrestationsList }
+        ]
+    }
+];
+
+// Reception Routes
 const receptionistRoutes = {
-    path: "/",
+    path: '/',
     component: ReceptionDashboardLayout,
-    meta: { requiresAuth: true, roles: ["Reception"] },
     children: [
-        { path: "", name: "Home", component: ReceptionPage },
-        {
-            path: "patients",
-            children: [
-                {path:"",component:PatientsList},
-                {path:":id",component:PatientDetails},
-            ]
-        },
-        {
-            path: "fiches",
-            children: [
-                {path:"",component:FichesList},
-                {path:":id",component:FicheDetails},
-            ]
-        }
-        // {path:"fiche-nav",component:FichesNav}
-        // { path: "patients", component: PatientsList, meta: { requiresAuth: true, roles: ["Reception"] } },
-        // { path: "/patients/:patientId/fiches", component: PatientFicheList, props: true, meta: { requiresAuth: true, roles: ["Reception"] } },
-        // { path: "/patients/:patientId/fiches/:ficheId/prestations", component: PrestationList, props: true, meta: { requiresAuth: true, roles: ["Reception"] } },
-        // { path: "fiches", component: FichesList, meta: { requiresAuth: true, roles: ["Reception"] } },
+        { path: '', component: ReceptionPage },
+        { path: 'patients', component: PatientsList },
+        { path: 'patients/:id', component: PatientDetails },
+        { path: 'medical-records', component: MedicalRecordList },
+        { path: 'medical-records/:id', component: MedicalRecordDetails },
     ],
 };
 
+// cashier routes
 const cashierRoutes = {
-    path: "/",
+    path: '/',
     component: CashierLayout,
-    meta: { requiresAuth: true, roles: ["Cashier"] },
     children: [
-        { path: '/', component: CashierPage },
-
-        { path: '/fiches/ficheId/prestations', component: CashierPrestationsList },
-        // { path: '/fiches/ficheId/prestations/history', component: CashierHistory }
+        { path: '', component: CashierPage },
+        { path: 'fiches/:ficheId/prestations', component: CashierPrestationsList }
     ]
 };
 
-const facturationRoutes = {
-        path: "/",
-        component: FacturationLayout,
-        meta: { requiresAuth: true, roles: ["Facturation"] },
-        children: [
-            { path: '', component: Step },
-            { path: 'home', component: FacturationHome },
-            { path: 'patient', component: Patient },
-            { path: 'patientF', component: FacturePatient, props: true },
-            { path: 'borderau', name: 'Borderau', component:Borderau, props: true }
-        ]
-    }
-
-;
 
 // Create router instance
 const router = createRouter({
@@ -124,37 +111,33 @@ const router = createRouter({
     routes,
 });
 
-// **Flag to track added routes**
+// Track if dynamic routes have been added
 let routesAdded = false;
 
-// **Global Route Guard for Dynamic Role-Based Routing**
-router.beforeEach((to, from, next) => {
-    const user = JSON.parse(localStorage.getItem("user"));
+// Global route guard
+router.beforeEach(async (to, from, next) => {
+    const userStore = useUserStore();
+    await userStore.fetchSession(); // Ensure session is fetched
 
-    if (!user) {
-        if (to.path !== "/login") return next("/login"); // Redirect guests to login
-        return next();
-    }
+    // Allow login page without checking session
+    if (to.path === '/login') return next();
 
-    if (!routesAdded) {
-        if (user.role === "Admin") {
-            router.addRoute(adminRoutes);  // Load admin routes dynamically
-        } else if (user.role === "Reception") {
-            // receptionistRoutes.forEach(route => router.addRoute(route)); // Load receptionist routes dynamically
-            router.addRoute(receptionistRoutes);
-        } else if (user.role === "Cashier") {
-            router.addRoute(cashierRoutes);
-        } else if (user.role === "Facturation") {
-            router.addRoute(facturationRoutes);
+    if (userStore.isAuthenticated) {
+        if (!routesAdded) {
+            if (userStore.role === 'Admin') {
+                adminRoutes.forEach(route => router.addRoute(route)); // Add admin routes dynamically
+            } else if (userStore.role === 'Reception') {
+                router.addRoute(receptionistRoutes); // Add receptionist routes dynamically
+            } else if (userStore.role === 'Cashier') {
+                router.addRoute(cashierRoutes); // Add cashier routes dynamically
+            }
+            routesAdded = true;
+            return next(to.fullPath); // Retry original route after adding new routes
         }
-
-        routesAdded = true;
-        return next(to.fullPath); // Reload current route
+        next(); // Continue navigation if routes are already added
+    } else {
+        next('/login'); // If not authenticated, redirect to login
     }
-
-    next(); // Continue navigation
 });
-
-
 
 export default router;

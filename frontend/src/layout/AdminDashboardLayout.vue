@@ -16,7 +16,8 @@ const toggleSidebar = () => {
 
 const menuItems = [
     { label: "Users", icon: "pi pi-users", route: "/users" },
-    { label: "Roles & Services", icon: "pi pi-shield", route: "/roles-services" },
+    // { label: "Roles & Services", icon: "pi pi-shield", route: "/roles-services" },
+    { label: "Preferences", icon: "pi pi-users", route: "/preferences" },
     { label: "Reception", icon: "pi pi-bell", route: "/reception" },
     { label: "Agreement", icon: "pi pi-file", route: "/agreement" },
     { label: "Service Manager", icon: "pi pi-briefcase", route: "/service-manager" },

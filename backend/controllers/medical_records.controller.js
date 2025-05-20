@@ -67,10 +67,24 @@ const getMedicalsRecordSummary = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 }
+
+const deleteMedicalRecord = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const deletedMedicalRecord = await medicalRecordsModel.deleteMedical(id);
+        if (!deletedMedicalRecord) {
+            return res.status(404).json({ message: 'Medical record not found' });
+        }
+        res.status(200).json({ message: 'Medical record deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
 module.exports = {
     createMedicalRecord,
     getMedicalsRecords,
     getMedicalRecord,
     updateMedicalRecord,
-    getMedicalsRecordSummary
+    getMedicalsRecordSummary,
+    deleteMedicalRecord
 };

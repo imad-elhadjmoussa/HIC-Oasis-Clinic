@@ -44,3 +44,12 @@ export const updateMedicalRecord = async (id, medicalRecord) => {
         throw new Error(error.response?.data?.message || 'Failed to update fiche');
     }
 }
+
+export const deleteMedicalRecord = async (id) => {
+    try {
+        const response = await ficheApi.delete(`/${id}`);
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Failed to delete fiche');
+    }
+}

@@ -5,10 +5,11 @@ import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import { useToast } from 'primevue/usetoast';
 import Toast from 'primevue/toast';
-import EditPatientDialog from './EditPatientDialog.vue';
+import EditPatientDialog from '../../../components/Patients/EditPatientDialog.vue';
 import { getPatient, getPatientMedicalRecords } from '../../../api/patient';
 import { calculateAge, formatDate, showNotification, statusSeverity } from '..';
-import MedicalRecordsTable from '../Fiche/MedicalRecordsTable.vue';
+import MedicalRecordsTable from '../../../components/MedicalRecords/MedicalRecordsTable.vue';
+import PatinetMedicalRecoerdsList from '../../../components/Patients/PatinetMedicalRecoerdsList.vue';
 
 const toast = useToast();
 const route = useRoute();
@@ -166,10 +167,10 @@ const savePatientChanges = (updatedPatient) => {
             </template>
         </Dialog>
 
-        <div class="bg-white rounded-lg shadow-sm p-6 mb-4">
-            <h3 class="text-xl font-semibold mb-4">Medical Records</h3>
-            <MedicalRecordsTable :records="patientMedicalRecords" />
-        </div>
+
+        <!-- <MedicalRecordsTable :records="patientMedicalRecords" /> -->
+        <PatinetMedicalRecoerdsList :records="patientMedicalRecords" />
+
 
         <!-- Edit Patient Dialog -->
         <EditPatientDialog v-model:visible="editPatientDialog" :patient="patient" @save="savePatientChanges"

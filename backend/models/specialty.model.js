@@ -6,6 +6,61 @@ const getSpecialties = async () => {
     return rows;
 }
 
+const createSpecialty = async (data) => {
+    console.log(data);
+    try {
+        const [result] = await db.query(
+            "INSERT INTO Specialty (specialty_name) VALUES (?)",
+            [data.specialty_name]
+        );
+        return {
+            id: result.insertId,
+            specialty_name:data.specialty_name
+        };
+    } catch (error) {
+        console.error("Error creating specialty:", error);
+        throw new Error("Can't create specialty");
+    }
+}
+
+const updateSpecialty = async (specialtyId, data) => {
+    try {
+        const { specialty_name } = data;
+        const [result] = await db.query(
+            "UPDATE Specialty SET specialty_name = ? WHERE id = ?",
+            [specialty_name, specialtyId]
+        );
+        if (result.affectedRows === 0) {
+            return null; // Specialty not found
+        }
+        return {
+            id: specialtyId,
+            specialty_name: specialty_name
+        };
+    } catch (error) {
+        console.error("Error updating specialty:", error);
+        throw new Error("Can't update specialty");
+    }
+}
+
+const deleteSpecialty = async (specialtyId) => {
+    try {
+        const [result] = await db.query(
+            "DELETE FROM Specialty WHERE id = ?",
+            [specialtyId]
+        );
+        if (result.affectedRows === 0) {
+            return null; // Specialty not found
+        }
+        return {
+            message: "Specialty deleted successfully"
+        };
+    } catch (error) {
+        console.error("Error deleting specialty:", error);
+        throw new Error("Can't delete specialty");
+    }
+}
+
 const getSpecialtyDetails = async (specialtyId) => {
     const [rows] = await db.query(
         `
@@ -19,17 +74,13 @@ const getSpecialtyDetails = async (specialtyId) => {
 
             PrestationList.id AS prestation_id,
             PrestationList.prestation_name,
-            PrestationList.prestation_code,
+            PrestationList.prestation_code
 
-            WaitingRoom.id AS room_id,
-            WaitingRoom.room_name,
-            WaitingRoom.number
 
         FROM Specialty
 
         LEFT JOIN Doctor ON Doctor.specialty_id = Specialty.id
         LEFT JOIN PrestationList ON PrestationList.specialty_id = Specialty.id
-        LEFT JOIN WaitingRoom ON WaitingRoom.id = PrestationList.waiting_room_id
 
         WHERE Specialty.id = ?
         `,
@@ -87,5 +138,8 @@ const getSpecialtyDetails = async (specialtyId) => {
 
 module.exports = {
     getSpecialties,
-    getSpecialtyDetails
+    getSpecialtyDetails,
+    createSpecialty,
+    updateSpecialty,
+    deleteSpecialty
 };

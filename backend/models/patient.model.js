@@ -99,8 +99,15 @@ const updatePatient = async (id, patient) => {
 };
 
 const deletePatient = async (id) => {
-    const [result] = await db.query('DELETE FROM patients WHERE patient_id = ?', [id]);
-    return result;
+    try {
+        const [result] = await db.query('DELETE FROM patient WHERE id = ?', [id]);
+        if (result.affectedRows === 0) {
+            throw new Error("Patient not found.");
+        }
+        return true;
+    } catch (error) {
+        throw new Error("Can not delete this patient ");
+    }
 };
 
 // Additional useful patient-specific queries

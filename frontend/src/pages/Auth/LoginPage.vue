@@ -7,6 +7,7 @@ import Card from "primevue/card";
 import Toast from "primevue/toast";
 import { useToast } from "primevue/usetoast";
 import { useRouter } from "vue-router";
+import { login } from "../../api/auth";
 
 const email = ref(""); // Changed from 'username' to 'email'
 const password = ref("");
@@ -20,24 +21,11 @@ const loginUser = async () => {
     }
 
     try {
-        const response = await fetch("http://localhost:5000/api/auth/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: email.value, password: password.value }),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || "Login failed");
-        }
-
+        const data = await login(email.value, password.value);
         // Store user session in localStorage
-        localStorage.setItem("user", JSON.stringify(data.user));
-
+        // localStorage.setItem("user", JSON.stringify(data.user));
         // Show success toast
         toast.add({ severity: "success", summary: "Success", detail: "Login successful!", life: 3000 });
-
         // Redirect after login
         setTimeout(() => {
             // router.push("/"); // Change to your target page

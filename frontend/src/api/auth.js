@@ -1,19 +1,33 @@
-export const logoutUser = async (toast) => {
-    try {
-        // Clear local storage
-        localStorage.removeItem("user");
+import axios from 'axios';
 
-        // Show success message
-        toast.add({ severity: "success", summary: "Success", detail: "Logout successful!", life: 3000 });
+const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
-        // Redirect to login page
-        setTimeout(() => {
-            // router.push("/login");
-            // setRoutesAdded(false) 
-            window.location.reload();
-
-        }, 2000);
-    } catch (error) {
-        toast.add({ severity: "error", summary: "Logout Failed", detail: "Try again", life: 3000 });
+const authApi = axios.create({
+    baseURL: `${SERVER_URL}/api/auth`,
+    headers: {
+        'Content-Type': 'application/json'
     }
-};
+});
+
+export const login = async (email, password) => {
+    try {
+        const response = await authApi.post('/login', { email, password },
+            { withCredentials: true }
+        );
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Login failed');
+    }
+}
+
+
+export const logoutUser = async () => {
+    try {
+        const response = await authApi.post('/logout', {}, { withCredentials: true });
+        return response.data;
+    } catch (error) {
+        throw new Error(error.response?.data?.message || 'Logout failed');
+    }
+}
+
+

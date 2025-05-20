@@ -13,6 +13,7 @@ import ui from '@nuxt/ui/vue-plugin'
 import PrimeVue from 'primevue/config';
 import Aura from '@primeuix/themes/aura';
 import 'primeicons/primeicons.css'
+import { createPinia } from 'pinia';
 
 const MyPreset = definePreset(Aura, {
     semantic: {
@@ -57,6 +58,7 @@ app.use(PrimeVue, {
 });
 app.use(PrimeVue)
 app.use(ToastService);
+app.use(createPinia()) 
 app.component('font-awesome-icon', FontAwesomeIcon);
 app.mount('#app')
 
